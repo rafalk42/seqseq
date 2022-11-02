@@ -1,1 +1,2 @@
 # seqseq
+IPA: /sɪk/
