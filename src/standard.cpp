@@ -77,8 +77,5 @@ const set<Instruction> instructionSet = {
 };
 
 InstructionSet standardInstructionSet() {
-//    for(const auto &i : instructionSet) {
-//        std::cerr << "(" << i.id << ":" << i.mnemonic << ")" << i.description << std::endl;
-//    }
     return instructionSet;
 }

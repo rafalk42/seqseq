@@ -16,6 +16,9 @@ public:
     TypeString fetchVarString(size_t index);
     TypeInt fetchVarInt(size_t index);
     std::ostream &getOutput();
+    ProgramCounter getPc() const;
+    void pcNext();
+    void pcSet(const ProgramCounter newPc);
 
 private:
     std::vector<TypeString> varString;

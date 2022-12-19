@@ -19,24 +19,39 @@ bool operator<(const Instruction &a, const Instruction &b) {
     return a.id < b.id;
 }
 
-Engine::Engine(const Program &program, const InstructionSet &instructionSet)
+Engine::Engine(const Program &program, const InstructionSet &instructionSet, const bool verbose)
     : program(program),
-      instructionSet(instructionSet) {
+      instructionSet(instructionSet),
+      verbose(verbose) {
     state.reset();
 }
 
 void Engine::run() {
-    for(auto i=0; i<program.size(); i++) {
-        CodeId f = program[i];
+//    for(auto i=0; i<program.size(); i++) {
+    while(state.getPc() < program.size()) {
+        const auto pc = state.getPc();
+        bool withParam = false;
+
+        if(!program[pc].isCode()) {
+            cerr << "[pc:" << pc << "] Invalid state: program counter doesn't point to a code" << endl;
+            break;
+        }
+
+        CodeId f = program[pc];
         optional<string> p = nullopt;
-        if(program[i + 1].isBox()) {
-            p = program[++i];
+        if(program[pc + 1].isBox()) {
+            p = program[pc + 1];
+            withParam = true;
         }
-        cerr << "EXE[" << i - 1 << "]: (" << f << ")";
-        if(p) {
-            cerr << "{" << (p.has_value() ? *p : "") << "}";
+
+        if (verbose)
+        {
+            cerr << "EXE[" << pc << "]: (" << f << ")";
+            if(p) {
+                cerr << "{" << (p.has_value() ? *p : "") << "}";
+            }
+            cerr << endl;
         }
-        cerr << endl;
 
         const auto inst = getInstruction(f);
         if(inst) {
@@ -44,6 +59,11 @@ void Engine::run() {
         } else {
             cerr << "Instruction (" << f << ") not defined" << endl;
             // TODO: configurable behaviour: terminate, ignore
+        }
+
+        state.pcNext();
+        if(withParam) {
+            state.pcNext();
         }
     }
 }

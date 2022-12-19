@@ -29,7 +29,7 @@ typedef std::set<Instruction> InstructionSet;
 class Engine
 {
 public:
-    Engine(const Program &program, const InstructionSet &instructionSet);
+    Engine(const Program &program, const InstructionSet &instructionSet, const bool verbose);
     void run();
 
 private:
@@ -37,5 +37,6 @@ private:
     Program program;
     InstructionSet instructionSet;
     State state;
+    bool verbose;
 };
 

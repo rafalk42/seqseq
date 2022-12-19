@@ -2,6 +2,7 @@
 #include <sstream>
 #include <map>
 #include <tclap/CmdLine.h>
+#include <fstream>
 
 #include "parser.h"
 #include "engine.h"
@@ -15,29 +16,43 @@ void dumpProgram(vector<Element> program);
 
 int main(int argc, char **argv)
 {
-    TCLAP::CmdLine cmd("Command description message", ' ', "0.9");
-    TCLAP::ValueArg<std::string> nameArg("s", "seq", "The Sequence", true, "seqseq", "string", cmd);
+    TCLAP::CmdLine cmd("By default program is read from standard input.", ' ', "0.9");
+    TCLAP::ValueArg<string> seqArg("s", "seq", "The Sequence", true, "", "string", cmd);
+    TCLAP::ValueArg<string> fileArg("f", "file", "file to read instead of standard input", false, "", "string", cmd);
+    TCLAP::SwitchArg verboseSwitch("v", "verbose", "Verbose/debug output", cmd, false);
+
     try {
-//        TCLAP::SwitchArg reverseSwitch("r","reverse","Print name backwards", cmd, false);
         cmd.parse(argc, argv);
-//        bool reverseName = reverseSwitch.getValue();
     } catch(TCLAP::ArgException &e) {
         cerr << "error: " << e.error() << " for arg " << e.argId() << endl;
     }
 
     string code = "";
-    for (string line; getline(cin, line);) {
-        code += line;
+    if(fileArg.isSet()) {
+        ifstream t(fileArg);
+        code = string((std::istreambuf_iterator<char>(t)),
+                         std::istreambuf_iterator<char>());
+    } else {
+        for (string line; getline(cin, line);) {
+            code += line;
+        }
     }
 
-    const auto theSequence = nameArg.getValue();
+    const auto theSequence = seqArg.getValue();
     Parser p(theSequence);
     //    auto program = p.parse("seqseqseqsHelloseqseqseqsworld!se0seqseqsese1seqseqseq");
 //    auto program = p.parse("?HelloworlHello?Helloworlworld!?H0?Hellowo?H1?Hellowor");
     auto program = p.parse(code);
-    dumpProgram(program);
+    if(verboseSwitch) dumpProgram(program);
 
-    Engine e(program, standardInstructionSet());
+    const auto is = standardInstructionSet();
+    if(verboseSwitch) {
+        for(const auto &i : is) {
+            std::cerr << "(" << i.id << ":" << i.mnemonic << ")" << i.description << std::endl;
+        }
+    }
+
+    Engine e(program, is, verboseSwitch);
 
     e.run();
 

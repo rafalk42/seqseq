@@ -34,3 +34,18 @@ uint64_t State::fetchVarInt(size_t index) {
 std::ostream &State::getOutput() {
     return *output;
 }
+
+ProgramCounter State::getPc() const
+{
+    return pc;
+}
+
+void State::pcNext()
+{
+    pc++;
+}
+
+void State::pcSet(const ProgramCounter newPc)
+{
+    pc = newPc;
+}
